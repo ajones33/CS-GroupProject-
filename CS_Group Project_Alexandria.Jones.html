@@ -8,9 +8,9 @@
     <script src="processing.min.js"></script>
 </head>
 <body>
-<canvas id="canvas"></canvas>
 <button id = "button1">Restart</button><br>
 <button id = "button2">Try a harder level</button><br>
+<canvas id="canvas"></canvas>
 <script>
 
     var canvas = document.getElementById("canvas");
@@ -57,9 +57,6 @@
                 {
                   location.reload();
                 };
-
-
-
             // =================================================================
             // Replace the ellipse, arc and fill commands below with your code.
             // =================================================================
@@ -124,13 +121,12 @@
                 // Make an array which has 2 of each, then randomize it
                 var possibleFaces = faces.slice(0);
                 var selected = [];
-                for (var i = 0; i < (NUM_COLS * NUM_ROWS) / 3; i++)
+                for (var i = 0; i < (NUM_COLS * NUM_ROWS) / 2; i++)
                 {
                     // Randomly pick one from the array of remaining faces
                     var randomInd = floor(random(possibleFaces.length));
                     var face = possibleFaces[randomInd];
-                    // Push three times onto array
-                    selected.push(face);
+                    // Push twice onto array
                     selected.push(face);
                     selected.push(face);
                     // Remove from array
@@ -174,22 +170,17 @@
                 {
                     if (tiles[i].isUnderMouse(mouseX, mouseY))
                     {
-                        if (flippedTiles.length < 3 && !tiles[i].isFaceUp) {
+                        if (flippedTiles.length < 2 && !tiles[i].isFaceUp) {
                             tiles[i].drawFaceUp();
                             flippedTiles.push(tiles[i]);
-                            console.log(flippedTiles);
-                            if (flippedTiles.length === 3)
+                            if (flippedTiles.length === 2)
                             {
                                 numTries++;
-
-                                if (flippedTiles[0].face === flippedTiles[1].face && flippedTiles[1].face === flippedTiles[2].face)
+                                if (flippedTiles[0].face === flippedTiles[1].face)
                                 {
                                     flippedTiles[0].isMatch = true;
                                     flippedTiles[1].isMatch = true;
-                                    flippedTiles[2].isMatch = true;
                                 }
-
-
                                 delayStartFC = frameCount;
                                 loop();
                             }
@@ -203,7 +194,7 @@
                 if (foundAllMatches) {
                     fill(0, 0, 0);
                     textSize(20);
-                    text("You found them all in " + numTries + " tries!", 20, 550);
+                    text("You found them all in " + numTries + " tries!", 20, 375);
                 }
             };
 
@@ -222,7 +213,6 @@
                         {
                             tiles[i].drawFaceDown();
                         }
-
                     }
                     flippedTiles = [];
                     delayStartFC = null;
@@ -236,8 +226,8 @@
             //======================================================================
 
             // Global config
-            var NUM_COLS = 6;
-            var NUM_ROWS = 5;
+            var NUM_COLS = 5;
+            var NUM_ROWS = 4;
 
             var flippedTiles = [];
             var delayStartFC = null;
@@ -260,8 +250,7 @@
                         "old-spice-man.png",
                         "robot_female_1.png",
                         "piceratops-tree.png",
-                        "orange-juice-squid.png",
-                        "donut.png"
+                        "orange-juice-squid.png"
                     ];
 
             var imageLoadedCount = 0;
@@ -290,3 +279,5 @@
 </script>
 </body>
 </html>
+
+
