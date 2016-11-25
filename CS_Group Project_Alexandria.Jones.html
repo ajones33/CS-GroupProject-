@@ -10,6 +10,7 @@
 <body>
 <button id = "button1">Restart</button><br>
 <button id = "button2">Try a harder level</button><br>
+
 <canvas id="canvas"></canvas>
 <script>
 
@@ -48,7 +49,7 @@
 
 
                 button1.onclick = function() {LevelRestart()};
-                button2.onclick = function()  {actionLevel2()};
+                button2.onclick = function()  {level2()};
 
             // =================================================================
             // functionLevelRestart
@@ -57,6 +58,17 @@
                 {
                   location.reload();
                 };
+            // =================================================================
+            // Level Counter
+            // =================================================================
+
+            var level = 1;
+            /*=================================================================
+            ===========function for NextLevel.
+             ==================================================================*/
+
+
+
             // =================================================================
             // Replace the ellipse, arc and fill commands below with your code.
             // =================================================================
@@ -73,8 +85,8 @@
 
             Tile.prototype.drawFaceDown = function ()
             {
-                fill(214, 247, 202);
-                strokeWeight(2);
+                fill(30,144,255);
+                strokeWeight(3);
                 rect(this.x, this.y, this.width, this.width, 10);
                 context.drawImage(leafImage, this.x, this.y, this.width, this.width);
                 this.isFaceUp = false
@@ -83,8 +95,8 @@
 
             Tile.prototype.drawFaceUp = function ()
             {
-                fill(214, 247, 202);
-                strokeWeight(2);
+                fill(135,206,250);
+                strokeWeight(3);
                 rect(this.x, this.y, this.width, this.width, 10);
                 context.drawImage(this.face, this.x, this.y, this.width, this.width);
                 this.isFaceUp = true;
@@ -191,14 +203,15 @@
                 for (var i = 0; i < tiles.length; i++) {
                     foundAllMatches = foundAllMatches && tiles[i].isMatch;
                 }
-                if (foundAllMatches) {
+                if (foundAllMatches)
+                {
                     fill(0, 0, 0);
                     textSize(20);
                     text("You found them all in " + numTries + " tries!", 20, 375);
+                    level++;
                 }
+
             };
-
-
 
             //======================================================================
             //                   draw
@@ -235,28 +248,33 @@
 
 
             var leafImage = new Image();
-            leafImage.src = "leaf-green.png";
+            leafImage.src = "cover-star.png";
 
             var faceImageFileNames =
                     [
-                        "leafers-seed.png",
-                        "leafers-seedling.png",
-                        "leafers-sapling.png",
-                        "leafers-tree.png",
-                        "leafers-ultimate.png",
-                        "marcimus.png",
-                        "mr-pants.png",
-                        "mr-pink.png",
-                        "old-spice-man.png",
-                        "robot_female_1.png",
-                        "piceratops-tree.png",
-                        "orange-juice-squid.png"
+                        "purple-planet.png",
+                        "green-planet.png",
+                        "Red-Planet.png",
+                        "multi-world.png",
+                        "lightblue-planet.png",
+                        "green-moon.png",
+                        "darkblue-planet.png",
+                        "purple-ufo.png",
+                        "blue-ufo.png",
+                        "purple-rocket.png",
+                        "purple_moon.png",
+                        "pink-alien.png"
                     ];
 
             var imageLoadedCount = 0;
             var totalImages = 1 + faceImageFileNames.length;
             var faces = [];
             var tiles = [];
+
+            var music = new Audio('bensound-scifi.mp3');
+            music.loop = true;
+            music.play();
+
 
             console.log("Number of images being loaded = " + totalImages);
 
@@ -270,6 +288,38 @@
                 faces.push(myImage);
             }
 
+
+
+            var xPositions = [];
+            var yPositions = [];
+            var dropColor = [];
+
+            var Xpositions = [];
+            var Ypositions =[];
+
+            //drops will fall randomly//
+            for(var a = 0; a < 20; a++)
+            {
+                xPositions.push(random(400));
+                yPositions.push(random(400));
+            }
+            for(var a = 0; a < 20; a++)
+            {
+                Xpositions.push(random(400));
+                Ypositions.push(random(400));
+            }
+
+            //each drop and rectangle is a different color//
+            for(var a = 0; a < 200; a++)
+            {
+                dropColor.push (color(random(150,255),random(150,255), random(150,255)));
+            }
+            //adds new drops//
+            mouseClicked = function()
+            {
+                xPositions.push(random(mouseX));
+                yPositions.push(mouseY);
+            };
 
             //================ END OF MODIFY CODE BLOCK =====================
         }
