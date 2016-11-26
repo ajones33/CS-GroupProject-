@@ -1,29 +1,24 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <!--Guys, do not turn your homework in with this canned title.
-    Replace the title with your name and something that tells the viewer what
-    the page is about.-->
-    <title>Memory Game</title>
+    Final Project. <br> Lexie Jones, <br> Alex Alvara, <br> Tristan <br>
+    <title>Group Project</title>
     <script src="processing.min.js"></script>
 </head>
 <body>
+<canvas id="canvas"></canvas><br>
 <button id = "button1">Restart</button><br>
-<button id = "button2">Try a harder level</button><br>
-
-<canvas id="canvas"></canvas>
+<button id = "button2">Next level</button><br>
 <script>
 
     var canvas = document.getElementById("canvas");
-
     var canvasWidth  = 700;
     var canvasHeight = 700;
     var processing = new Processing(canvas, function(processing)
     {
-        context=canvas.getContext("2d");
+        context = canvas.getContext("2d"); //loads images on canvas
         processing.size(canvasWidth, canvasHeight);
         processing.background(0xFFF);
-
 
         // Changes API to use degrees rather than radians in rotate and arc.
         var rotateFn = processing.rotate;
@@ -37,7 +32,6 @@
             arcDeg(x,y,w,h,s*(Math.PI/180),e*(Math.PI/180));
         };
 
-
         with (processing)
         {
 
@@ -47,9 +41,8 @@
                 var button1 = document.getElementById ("button1");
                 var button2 = document.getElementById("button2");
 
-
                 button1.onclick = function() {LevelRestart()};
-                button2.onclick = function()  {level2()};
+                button2.onclick = function()  {nextLevel()};
 
             // =================================================================
             // functionLevelRestart
@@ -58,17 +51,6 @@
                 {
                   location.reload();
                 };
-            // =================================================================
-            // Level Counter
-            // =================================================================
-
-            var level = 1;
-            /*=================================================================
-            ===========function for NextLevel.
-             ==================================================================*/
-
-
-
             // =================================================================
             // Replace the ellipse, arc and fill commands below with your code.
             // =================================================================
@@ -129,7 +111,6 @@
 
                 if (imageLoadedCount < totalImages) return;
 
-
                 // Make an array which has 2 of each, then randomize it
                 var possibleFaces = faces.slice(0);
                 var selected = [];
@@ -169,10 +150,6 @@
                 }
             };
 
-
-
-
-
             //======================================================================
             //                   mouseClicked
             //======================================================================
@@ -208,9 +185,10 @@
                     fill(0, 0, 0);
                     textSize(20);
                     text("You found them all in " + numTries + " tries!", 20, 375);
+                    text("Good Job! On to the next level.",20,425);
                     level++;
+                    gameReset();
                 }
-
             };
 
             //======================================================================
@@ -233,12 +211,15 @@
                 }
             };
 
-
             //======================================================================
             //                   Called when page is loaded
             //======================================================================
 
+
+
+
             // Global config
+            var level = 0;
             var NUM_COLS = 5;
             var NUM_ROWS = 4;
 
@@ -287,9 +268,7 @@
                 myImage.onLoad = imagesLoaded();
                 faces.push(myImage);
             }
-
-
-
+/*
             var xPositions = [];
             var yPositions = [];
             var dropColor = [];
@@ -312,14 +291,68 @@
             //each drop and rectangle is a different color//
             for(var a = 0; a < 200; a++)
             {
-                dropColor.push (color(random(150,255),random(150,255), random(150,255)));
+                dropColor.push (color(rando
+                m(150,255),random(150,255), random(150,255)));
             }
             //adds new drops//
             mouseClicked = function()
             {
                 xPositions.push(random(mouseX));
                 yPositions.push(mouseY);
+            };*/
+
+            gameReset = function (){
+
+
+                //Code to ask if they want to go next level
+                //If not accept, level = 0;
+
+
+                //Code to redraw canvas
+
+                NUM_COLS = 5 + level;
+                NUM_ROWS = 4 + level;
+                flippedTiles = [];
+                delayStartFC = null;
+                numTries = 0;
+
+                leafImage = new Image();
+                leafImage.src = "leaf-green.png";
+
+                faceImageFileNames =
+                    [
+                        "leafers-seed.png",
+                        "leafers-seedling.png",
+                        "leafers-sapling.png",
+                        "leafers-tree.png",
+                        "leafers-ultimate.png",
+                        "marcimus.png",
+                        "mr-pants.png",
+                        "mr-pink.png",
+                        "old-spice-man.png",
+                        "robot_female_1.png",
+                        "piceratops-tree.png",
+                        "orange-juice-squid.png"
+                    ];
+
+                imageLoadedCount = 0;
+                totalImages = 1 + faceImageFileNames.length;
+                faces = [];
+                tiles = [];
+
+                console.log("Number of images being loaded = " + totalImages);
+
+
+                leafImage.onLoad = imagesLoaded();
+                for (var i = 0; i < faceImageFileNames.length; i++)
+                {
+                    var myImage = new Image();
+                    myImage.src = faceImageFileNames[i];
+                    myImage.onLoad = imagesLoaded();
+                    faces.push(myImage);
+                };
             };
+
 
             //================ END OF MODIFY CODE BLOCK =====================
         }
