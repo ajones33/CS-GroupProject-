@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html>
+<head>
+    Final Project. <br> Lexie Jones, <br> Alex Alvara, <br> Tristan Durand <br>
+    <title>Group Project</title>
+    <script src="processing.min.js"></script>
+</head>
+<body>
+<canvas id="canvas"></canvas>
+<br>
+<button id="button1">Restart</button>
+<br>
+<button id="button2">Next level</button>
+<br>
+<script>
+
+    var canvas = document.getElementById("canvas");
+    var canvasWidth = 700;
+    var canvasHeight = 700;
+    var processing = new Processing(canvas, function (processing)
+    {
+        context = canvas.getContext("2d"); //loads images on canvas
+        processing.size(canvasWidth, canvasHeight);
+        processing.background(0xFFF);
+
+        // Changes API to use degrees rather than radians in rotate and arc.
+        var rotateFn = processing.rotate;
+        processing.rotate = function (angle)
+        {
+            rotateFn(processing.radians(angle));
+        };
+        var arcDeg = processing.arc;
+        processing.arc = function (x, y, w, h, s, e)
+        {
+            arcDeg(x, y, w, h, s * (Math.PI / 180), e * (Math.PI / 180));
+        };
+
+        with (processing)
+        {
+
+            // =================================================================
+            // Intial loading of the buttons
+            // =================================================================
+            var button1 = document.getElementById("button1");
+            var button2 = document.getElementById("button2");
+
+            button1.onclick = function ()
+            {
+                LevelRestart();
+            };
+            button2.onclick = function ()
+            {
+                gameReset();
+            };
+
+            // =================================================================
+            // functionLevelRestart
+            // =================================================================
+            LevelRestart = function ()
+            {
+                location.reload();
+            };
+            // =================================================================
+            // Replace the ellipse, arc and fill commands below with your code.
+            // =================================================================
+
+
+            var Tile = function (x, y, face)
+            {
+                this.x = x;
+                this.y = y;
+                this.face = face;
+                this.width = 70;
+            };
+
+
+            Tile.prototype.drawFaceDown = function ()
+            {
+                fill(30, 144, 255);
+                strokeWeight(3);
+                rect(this.x, this.y, this.width, this.width, 10);
+                context.drawImage(leafImage, this.x, this.y, this.width, this.width);
+                this.isFaceUp = false
+            };
+
+
+            Tile.prototype.drawFaceUp = function ()
+            {
+                fill(135, 206, 250);
+                strokeWeight(3);
+                rect(this.x, this.y, this.width, this.width, 10);
+                context.drawImage(this.face, this.x, this.y, this.width, this.width);
+                this.isFaceUp = true;
+            };
+
+            Tile.prototype.isUnderMouse = function (x, y)
+            {
+                return x >= this.x && x <= this.x + this.width &&
+                    y >= this.y && y <= this.y + this.width;
+            };
+
+
+            //======================================================================
+            //                   imagesLoaded
+            // JavaScript likes to load images in an independent execution thread.
+            // This allows the program to continue running while large images are
+            // downloaded across the Internet.
+            // However, we do not want our program to draw the board until all
+            // the images have been loaded.
+            // This function gets called AFTER the page loads AND AFTER the images
+            // have finished loading.
+            //======================================================================
+            imagesLoaded = function ()
+            {
+
+                // Create the array of tiles at appropriate positions
+
+                imageLoadedCount++;
+                console.log("Done Loading Image " + imageLoadedCount
+                    + " of " + totalImages);
+
+                if (imageLoadedCount < totalImages) return;
+
+                // Make an array which has 2 of each, then randomize it
+                var possibleFaces = faces.slice(0);
+                var selected = [];
+                //var addPush = selected.push(face);
+                //var addUp = (2+level);
+                for (var i = 0; i < (NUM_COLS * NUM_ROWS) / (2 + level); i++)
+                {
+                    // Randomly pick one from the array of remaining faces
+                    var randomInd = floor(random(possibleFaces.length));
+                    var face = possibleFaces[randomInd];
+                    // Push twice onto array
+                    for (var j = 0; j < (2 + level); j++)
+                    {
+                        selected.push(face);
+                    }
+
+
+                    // Remove from array
+                    possibleFaces.splice(randomInd, 1);
+                }
+
+                // Now we need to randomize the array
+                selected.sort(function ()
+                {
+                    return 0.5 - Math.random();
+                });
+
+                // Create the tiles
+                for (var i = 0; i < NUM_COLS; i++)
+                {
+                    for (var j = 0; j < NUM_ROWS; j++)
+                    {
+                        tiles.push(new Tile(i * 78 + 10, j * 78 + 40, selected.pop()));
+                    }
+                }
+
+                background(255, 255, 255);
+
+                // Now draw them face up
+                for (var i = 0; i < tiles.length; i++)
+                {
+                    tiles[i].drawFaceDown();
+                }
+            };
+
+            //======================================================================
+            //                   mouseClicked
+            //======================================================================
+            mouseClicked = function ()
+            {
+                if (level == 0)
+                {
+                    checkMatch(2);
+                }
+                else if (level == 1)
+                {
+                    checkMatch(3);
+                }
+                else if (level == 2)
+                {
+                    checkMatch(4);
+                }
+            };
+
+            /*==============================
+             isMatch Function
+             =================================*/
+
+            checkMatch = function (n)
+            {
+                for (var i = 0; i < tiles.length; i++)
+                {
+                    if (tiles[i].isUnderMouse(mouseX, mouseY))
+                    {
+                        if (flippedTiles.length < n && !tiles[i].isFaceUp)
+                        {
+                            tiles[i].drawFaceUp();
+                            flippedTiles.push(tiles[i]);
+                            if (flippedTiles.length === n)
+                            {
+                                numTries++;
+                                if (n == 2)
+                                {
+
+                                    if (flippedTiles[0].face === flippedTiles[1].face)
+                                    {
+                                        flippedTiles[0].isMatch = true;
+                                        flippedTiles[1].isMatch = true;
+                                    }
+                                    delayStartFC = frameCount;
+                                    loop();
+                                }
+                                else if (n == 3)
+                                {
+
+                                    if (flippedTiles[0].face === flippedTiles[1].face&&
+                                        flippedTiles[1].face === flippedTiles[2].face)
+                                    {
+                                        flippedTiles[0].isMatch = true;
+                                        flippedTiles[1].isMatch = true;
+                                        flippedTiles[2].isMatch = true;
+                                    }
+                                    delayStartFC = frameCount;
+                                    loop();
+                                }
+                                else if (n == 4)
+                                {
+                                    if (flippedTiles[0].face === flippedTiles[1].face&&
+                                        flippedTiles[1].face === flippedTiles[2].face&&
+                                        flippedTiles[2].face === flippedTiles[3].face)
+                                    {
+                                        flippedTiles[0].isMatch = true;
+                                        flippedTiles[1].isMatch = true;
+                                        flippedTiles[2].isMatch = true;
+                                        flippedTiles[3].isMatch = true;
+                                    }
+                                    delayStartFC = frameCount;
+                                    loop();
+                                }
+                            }
+                        }
+                    }
+                }
+                var foundAllMatches = true;
+                for (var i = 0; i < tiles.length; i++)
+                {
+                    foundAllMatches = foundAllMatches && tiles[i].isMatch;
+                }
+                if (foundAllMatches)
+                {
+                    fill(0, 0, 0);
+                    textSize(20);
+                    text("You found them all in " + numTries + " tries!", 20, 425);
+                    level++;
+                    //gameReset();
+                }
+            };
+
+
+            //======================================================================
+            //                   draw
+            //======================================================================
+            draw = function ()
+            {
+                time -= 0.025;
+                if(time<= 0){
+                    gameReset();
+                }
+
+
+                if (delayStartFC && (frameCount - delayStartFC) > 30)
+                {
+
+                    for (var i = 0; i < tiles.length; i++)
+                    {
+                        if (!tiles[i].isMatch)
+                        {
+                            tiles[i].drawFaceDown();
+                        }
+                    }
+                    flippedTiles = [];
+                    delayStartFC = null;
+                   // noLoop();
+                }
+                noStroke();
+                fill (255, 255, 255);
+                rect (550, 50, 150, 150);
+                fill (255, 0, 0);
+                textSize (15);
+                text (time, 650, 100);
+            };
+
+            //======================================================================
+            //                   Called when page is loaded
+            //======================================================================
+
+
+            // Global config
+            var level = 0;
+            var NUM_COLS = 5;
+            var NUM_ROWS = 4;
+
+            var flippedTiles = [];
+            var delayStartFC = null;
+            var numTries = 0;
+            var time = 300;
+
+            var leafImage = new Image();
+            leafImage.src = "cover-star.png";
+
+            var faceImageFileNames =
+                [
+                    "purple-planet.png",
+                    "green-planet.png",
+                    "Red-Planet.png",
+                    "multi-world.png",
+                    "lightblue-planet.png",
+                    "green-moon.png",
+                    "darkblue-planet.png",
+                    "purple-ufo.png",
+                    "blue-ufo.png",
+                    "purple-rocket.png",
+                    "purple_moon.png",
+                    "pink-alien.png"
+                ];
+
+            var imageLoadedCount = 0;
+            var totalImages = 1 + faceImageFileNames.length;
+            var faces = [];
+            var tiles = [];
+
+            var music = new Audio('bensound-scifi.mp3');
+            music.loop = true;
+            music.play();
+
+
+            console.log("Number of images being loaded = " + totalImages);
+
+
+            leafImage.onLoad = imagesLoaded();
+            for (var i = 0; i < faceImageFileNames.length; i++)
+            {
+                var myImage = new Image();
+                myImage.src = faceImageFileNames[i];
+                myImage.onLoad = imagesLoaded();
+                faces.push(myImage);
+            }
+            /*      =============    what is this? animation? =================
+             var xPositions = [];
+             var yPositions = [];
+             var dropColor = [];
+
+             var Xpositions = [];
+             var Ypositions =[];
+
+
+             //drops will fall randomly//
+             for(var a = 0; a < 20; a++)
+             {
+             xPositions.push(random(400));
+             yPositions.push(random(400));
+             }
+             for(var a = 0; a < 20; a++)
+             {
+             Xpositions.push(random(400));
+             Ypositions.push(random(400));
+             }
+
+             //each drop and rectangle is a different color//
+             for(var a = 0; a < 200; a++)
+             {
+             dropColor.push (color(random));
+             random(150,255),random(150,255), random(150,255);
+             }
+             //adds new drops//
+             mouseClicked = function()
+             {
+             xPositions.push(random(mouseX));
+             yPositions.push(mouseY);
+             };*/
+            /*=================
+               ======GAME RESET FUNCTION==========
+               ======================*/
+
+            gameReset = function ()
+            {
+                //Code to ask if they want to go next level
+                //If not accept, level = 0;
+
+                //Code to redraw canvas
+                NUM_COLS = 5 + level;
+                NUM_ROWS = 4 + level;
+
+                if(level === 2)
+//                if(NUM_COLS>6)
+                {
+                    NUM_COLS=5;
+                    NUM_ROWS=8;
+                }
+
+                numTries = 0;
+                if (level==0){
+                    time = 300;
+                }
+                else if (level==1){
+                    time = 400;
+                }
+                else if (level ==2){
+                    time = 500;
+
+                }
+                imagesLoaded();
+            };
+
+            //================ END OF MODIFY CODE BLOCK =====================
+        }
+        if (typeof draw !== 'undefined') processing.draw = draw;
+    });
+
+</script>
+</body>
+</html>
+
+
